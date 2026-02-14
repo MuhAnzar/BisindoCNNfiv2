@@ -961,7 +961,6 @@
                     console.log("Loaded " + validKataClasses.length + " kata classes.");
                     renderKataCards();
                     populateKalimatTargets(); // Initialize kalimat targets
-                    setupKalimatInput(); // Setup kalimat input handler
                 }
             })
             .catch(err => console.error("Gagal memuat kelas kata:", err));
@@ -1339,23 +1338,24 @@
             }, 10000);
         }
 
-        const hands = window.hands; // Keep local ref if needed for existing code below
-
-        // Only set options if hands was successfully created
-        if (hands) {
-            hands.setOptions({
-                maxNumHands: 2,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.7,
-                minTrackingConfidence: 0.7
-            });
-
-            hands.onResults(onResults);
-        } else {
-            console.error('MediaPipe Hands is not available');
-            statusOverlay.querySelector('h3').textContent = 'AI System Unavailable';
-            statusOverlay.querySelector('p').textContent = 'Failed to initialize hand detection';
-        }
+        // Set options after initialization (hands may be ready or still loading)
+        // Use a short delay to allow initializeMediaPipe to complete
+        setTimeout(() => {
+            const hands = window.hands;
+            if (hands) {
+                hands.setOptions({
+                    maxNumHands: 2,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.7,
+                    minTrackingConfidence: 0.7
+                });
+                hands.onResults(onResults);
+            } else {
+                console.error('MediaPipe Hands is not available');
+                statusOverlay.querySelector('h3').textContent = 'AI System Unavailable';
+                statusOverlay.querySelector('p').textContent = 'Failed to initialize hand detection';
+            }
+        }, 100);
 
         function onResults(res) {
             if (!isModelReady) {

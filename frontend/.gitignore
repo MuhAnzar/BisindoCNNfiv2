@@ -45,13 +45,11 @@ Thumbs.db
 # docker-entrypoint.sh, .env.docker, .dockerignore
 
 # ============================================
-# Models ML - JANGAN IGNORE!
-# Pastikan model tersimpan di repo
+# Models ML - TOO LARGE for GitHub (>100MB)
+# Upload to VPS manually or via download script
 # ============================================
-# storage/app/public/models/ → TRACKED
-# Explicitly unignore models
-!storage/app/public/models/
-!storage/app/public/models/**
+storage/app/public/models/*.keras
+storage/app/public/models/kata/*.keras
 
 # ============================================
 # API Python cache (dihandle oleh api/.gitignore)
