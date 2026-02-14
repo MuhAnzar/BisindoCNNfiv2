@@ -18,9 +18,11 @@ echo "🔐 BISINDO - SSL Setup"
 echo "  Domain: $DOMAIN"
 echo "============================================"
 
-# Step 1: Create certbot directories
+# Step 1: Clean up and create directories
 echo ""
-echo "📁 Step 1: Creating directories..."
+echo "📁 Step 1: Cleaning up and creating directories..."
+# Remove old certbot dirs to prevent RecursionError/symlink loops
+rm -rf certbot/letsencrypt
 mkdir -p certbot/www/.well-known/acme-challenge
 mkdir -p certbot/letsencrypt
 
@@ -74,6 +76,7 @@ docker run --rm \
     --email "$EMAIL" \
     --agree-tos \
     --no-eff-email \
+    --non-interactive \
     -d "$DOMAIN"
 
 # Step 5: Switch nginx to HTTPS
