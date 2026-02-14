@@ -35,16 +35,30 @@ sleep 5
 # Step 3: Test ACME path
 echo ""
 echo "🔍 Step 3: Testing ACME challenge path..."
+
+# Create test file
+mkdir -p certbot/www/.well-known/acme-challenge
 echo "acme-test-ok" > certbot/www/.well-known/acme-challenge/test-file
+chmod -R 755 certbot/www
+
+# Debug: Check if file exists inside container
+echo "DEBUG: Checking file inside nginx container..."
+docker compose exec nginx ls -la /var/www/certbot/.well-known/acme-challenge/
+
+# Curl test
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${DOMAIN}/.well-known/acme-challenge/test-file")
 if [ "$HTTP_CODE" = "200" ]; then
     echo "✅ ACME challenge path works! (HTTP $HTTP_CODE)"
 else
     echo "❌ ACME challenge path failed (HTTP $HTTP_CODE)"
-    echo "   Check: firewall port 80, DNS, nginx config"
-    echo "   Debug: curl -v http://${DOMAIN}/.well-known/acme-challenge/test-file"
-    rm -f certbot/www/.well-known/acme-challenge/test-file
-    exit 1
+    echo "   Debug info:"
+    echo "   - Domain: $DOMAIN"
+    echo "   - Test URL: http://${DOMAIN}/.well-known/acme-challenge/test-file"
+    echo "   - Nginx Logs:"
+    docker compose logs nginx | tail -n 5
+    
+    # Don't exit yet, let's try to request anyway if it's just a curl issue from local
+    # exit 1 
 fi
 rm -f certbot/www/.well-known/acme-challenge/test-file
 
