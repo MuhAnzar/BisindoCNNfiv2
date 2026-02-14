@@ -1,0 +1,31 @@
+node_modules/
+vendor/
+.git/
+.vscode/
+.env
+
+# API Python files (built separately)
+api/__pycache__/
+api/.venv/
+api/test/
+api/test_dataset/
+api/debug_frames/
+api/*.png
+api/*.txt
+api/*.html
+api/*.log
+
+# Storage (mounted as volume)
+storage/app/public/models/
+
+# Build artifacts
+public/build/
+public/hot
+
+# Misc
+*.md
+!README.md
+UML/
+training_scripts/
+convert_*.py
+*.bat

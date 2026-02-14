@@ -1,0 +1,54 @@
+﻿Labels (26): ['Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar']...
+[Kata] Loading Resources...
+[Kata] Labels loaded: 26 classes
+[Kata] Sample classes: ['Apa', 'Apa Kabar', 'Bagaimana', 'Baik', 'Belajar']...
+[Kata] Model loaded.
+[Kata] Warming up MediaPipe Holistic...
+[Kata] MediaPipe warmup complete!
+Handler initialized.
+
+[DEBUG] Hand detection: 17/20 frames have hands
+Γ¥î True: Apa (idx=0) | Pred: Menulis (idx=13) conf=0.8401
+   True class conf: 0.0495 | Frames: 61 -> buffer: 61
+   Top-5: [('Menulis', '0.8401'), ('Apa', '0.0495'), ('Saya', '0.0481'), ('Bagaimana', '0.0293'), ('Sabar', '0.0238')]
+
+[DEBUG] Hand detection: 19/20 frames have hands
+Γ¥î True: Apa Kabar (idx=1) | Pred: Menulis (idx=13) conf=0.7252
+   True class conf: 0.0001 | Frames: 61 -> buffer: 61
+   Top-5: [('Menulis', '0.7252'), ('Saya', '0.0836'), ('Apa', '0.0732'), ('Bagaimana', '0.0673'), ('Sabar', '0.0359')]
+
+[DEBUG] Hand detection: 20/20 frames have hands
+Γ¥î True: Bagaimana (idx=2) | Pred: Menulis (idx=13) conf=0.8320
+   True class conf: 0.0294 | Frames: 61 -> buffer: 61
+   Top-5: [('Menulis', '0.8320'), ('Apa', '0.0564'), ('Saya', '0.0491'), ('Bagaimana', '0.0294'), ('Sabar', '0.0233')]
+
+[DEBUG] Hand detection: 19/20 frames have hands
+Γ¥î True: Baik (idx=3) | Pred: Menulis (idx=13) conf=0.7523
+   True class conf: 0.0000 | Frames: 61 -> buffer: 61
+   Top-5: [('Menulis', '0.7523'), ('Saya', '0.0804'), ('Apa', '0.0725'), ('Bagaimana', '0.0438'), ('Sabar', '0.0370')]
+
+[DEBUG] Hand detection: 17/20 frames have hands
+Γ¥î True: Belajar (idx=4) | Pred: Menulis (idx=13) conf=0.6766
+   True class conf: 0.0000 | Frames: 61 -> buffer: 61
+   Top-5: [('Menulis', '0.6766'), ('Saya', '0.1008'), ('Bagaimana', '0.0838'), ('Apa', '0.0805'), ('Sabar', '0.0433')]
+
+
+============================================================
+TEST WITHOUT FLIP (raw video frames)
+============================================================
+
+[DEBUG] Hand detection: 19/20 frames have hands
+Γ¥î True: Apa | Pred: Menulis conf=0.8124
+   True class conf: 0.0618
+   Top-5: [('Menulis', '0.8124'), ('Apa', '0.0618'), ('Saya', '0.0552'), ('Sabar', '0.0302'), ('Bagaimana', '0.0299')]
+
+[DEBUG] Hand detection: 19/20 frames have hands
+Γ¥î True: Apa Kabar | Pred: Menulis conf=0.8213
+   True class conf: 0.0000
+   Top-5: [('Menulis', '0.8213'), ('Saya', '0.0539'), ('Apa', '0.0531'), ('Bagaimana', '0.0358'), ('Sabar', '0.0257')]
+
+[DEBUG] Hand detection: 20/20 frames have hands
+Γ¥î True: Bagaimana | Pred: Menulis conf=0.8319
+   True class conf: 0.0294
+   Top-5: [('Menulis', '0.8319'), ('Apa', '0.0564'), ('Saya', '0.0491'), ('Bagaimana', '0.0294'), ('Sabar', '0.0233')]
+

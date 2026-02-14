@@ -1,0 +1,61 @@
+# ============================================
+# Laravel Default
+# ============================================
+/.phpunit.cache
+/.phpunit.result.cache
+/.phpactor.json
+/auth.json
+Homestead.json
+Homestead.yaml
+Thumbs.db
+.DS_Store
+
+# ---- IDE ----
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# ---- Environment ----
+.env
+.env.backup
+.env.production
+
+# ---- Dependencies ----
+/node_modules
+/vendor
+
+# ---- Build Output ----
+/public/build
+/public/hot
+/public/storage
+
+# ---- Storage ----
+/storage/*.key
+/storage/pail
+
+# ---- Logs ----
+*.log
+
+# ============================================
+# Docker (jangan ignore file Docker config)
+# ============================================
+# JANGAN ignore: Dockerfile, docker-compose.yml, 
+# docker-entrypoint.sh, .env.docker, .dockerignore
+
+# ============================================
+# Models ML - JANGAN IGNORE!
+# Pastikan model tersimpan di repo
+# ============================================
+# storage/app/public/models/ → TRACKED
+# Explicitly unignore models
+!storage/app/public/models/
+!storage/app/public/models/**
+
+# ============================================
+# API Python cache (dihandle oleh api/.gitignore)
+# ============================================
+api/__pycache__/
+api/.venv/
+api/debug_frames/

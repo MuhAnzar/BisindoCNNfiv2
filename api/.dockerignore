@@ -1,0 +1,32 @@
+__pycache__/
+*.pyc
+.venv/
+test/
+test_dataset/
+debug_frames/
+
+# Evaluation & test scripts
+eval_*.py
+test_*.py
+debug_*.py
+valid_*.py
+corrected_*.py
+prepare_*.py
+analyze_*.py
+naturalness_*.py
+run_eval_*.py
+
+# Output files
+*.png
+*.txt
+*.html
+*.log
+production.log
+map_output*
+bleu_*
+diagnose_*
+
+# Git
+.git
+.gitignore
+README.md

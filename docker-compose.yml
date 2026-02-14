@@ -1,0 +1,77 @@
+# ============================================
+# BISINDO CNN - Docker Compose
+# ============================================
+# Usage:
+#   docker-compose up --build
+#   docker-compose down
+#   docker-compose down -v  (remove volumes too)
+# ============================================
+
+services:
+  # ---- MySQL Database ----
+  db:
+    image: mysql:8.0
+    container_name: bisindo-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-bisindocnn}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD:-secret}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bisindo-net
+
+  # ---- Flask Python API ----
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: bisindo-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./storage/app/public/models:/app/models:ro
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - bisindo-net
+
+  # ---- Laravel Frontend ----
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bisindo-frontend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - bisindo-net
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  bisindo-net:
+    driver: bridge
