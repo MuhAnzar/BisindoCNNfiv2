@@ -2,9 +2,8 @@
 # ============================================
 # BISINDO CNN - SSL Init Script (Let's Encrypt)
 # ============================================
-# Run this ONCE on the VPS after first deploy:
-#   chmod +x init-ssl.sh
-#   ./init-ssl.sh
+# Run ONCE on VPS:
+#   chmod +x init-ssl.sh && ./init-ssl.sh
 # ============================================
 
 set -e
@@ -12,119 +11,120 @@ set -e
 # ---- Configuration ----
 IP="34.72.179.247"
 DOMAIN="${IP}.nip.io"
-EMAIL="admin@example.com"  # Change this to your email
+EMAIL="admin@example.com"  # Change to your email
 
 echo "============================================"
-echo "🔐 BISINDO CNN - SSL Certificate Setup"
+echo "🔐 BISINDO - SSL Setup"
+echo "  Domain: $DOMAIN"
 echo "============================================"
-echo "Domain: $DOMAIN"
-echo "Email:  $EMAIL"
-echo "============================================"
+
+# Step 1: Create certbot directories
 echo ""
+echo "📁 Step 1: Creating directories..."
+mkdir -p certbot/www/.well-known/acme-challenge
+mkdir -p certbot/letsencrypt
 
-# Step 1: Make sure containers are running (HTTP mode)
-echo "📦 Step 1: Starting containers in HTTP mode..."
+# Step 2: Start containers
+echo ""
+echo "📦 Step 2: Starting containers..."
+docker compose down 2>/dev/null || true
 docker compose up -d --build
-echo "⏳ Waiting for Nginx to be ready..."
+echo "⏳ Waiting 5s for Nginx..."
 sleep 5
 
-# Step 2: Test HTTP is reachable
+# Step 3: Test ACME path
 echo ""
-echo "🔍 Step 2: Testing HTTP access..."
-if curl -s -o /dev/null -w "%{http_code}" "http://$DOMAIN/.well-known/acme-challenge/test" | grep -q "404\|301"; then
-    echo "✅ Nginx is serving HTTP correctly"
+echo "🔍 Step 3: Testing ACME challenge path..."
+echo "acme-test-ok" > certbot/www/.well-known/acme-challenge/test-file
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${DOMAIN}/.well-known/acme-challenge/test-file")
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "✅ ACME challenge path works! (HTTP $HTTP_CODE)"
 else
-    echo "⚠️  Warning: HTTP may not be reachable. Proceeding anyway..."
+    echo "❌ ACME challenge path failed (HTTP $HTTP_CODE)"
+    echo "   Check: firewall port 80, DNS, nginx config"
+    echo "   Debug: curl -v http://${DOMAIN}/.well-known/acme-challenge/test-file"
+    rm -f certbot/www/.well-known/acme-challenge/test-file
+    exit 1
 fi
+rm -f certbot/www/.well-known/acme-challenge/test-file
 
-# Step 3: Request certificate from Let's Encrypt
+# Step 4: Request certificate
 echo ""
-echo "🔐 Step 3: Requesting SSL certificate from Let's Encrypt..."
-docker compose run --rm --entrypoint "certbot" certbot certonly \
+echo "🔐 Step 4: Requesting SSL certificate..."
+docker run --rm \
+    -v "$(pwd)/certbot/www:/var/www/certbot" \
+    -v "$(pwd)/certbot/letsencrypt:/etc/letsencrypt" \
+    certbot/certbot certonly \
     --webroot \
-    --webroot-path=/var/www/certbot \
+    -w /var/www/certbot \
     --email "$EMAIL" \
     --agree-tos \
     --no-eff-email \
     -d "$DOMAIN"
 
-# Step 4: Update Nginx config to HTTPS
+# Step 5: Switch nginx to HTTPS
 echo ""
-echo "⚙️  Step 4: Switching Nginx to HTTPS mode..."
-cat > nginx/conf/default.conf << 'NGINX_CONF'
+echo "⚙️  Step 5: Enabling HTTPS..."
+cat > nginx/conf/default.conf << NGINXEOF
 # ============================================
-# BISINDO CNN - Nginx Config (HTTPS Production)
+# Nginx - HTTPS Production (Let's Encrypt)
 # ============================================
 
-# --- HTTP: ACME challenge + redirect ---
+# HTTP -> HTTPS redirect + ACME challenge
 server {
     listen 80;
-    server_name _;
+    server_name ${DOMAIN};
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://\\\$host\\\$request_uri;
     }
 }
 
-# --- HTTPS: Main server ---
+# HTTPS
 server {
     listen 443 ssl;
-    server_name _;
+    server_name ${DOMAIN};
 
-    # Let's Encrypt certificate
-    ssl_certificate     /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
-    # Modern SSL settings
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
-
-    # HSTS
     add_header Strict-Transport-Security "max-age=31536000" always;
 
-    # Max upload size
     client_max_body_size 50M;
 
-    # Proxy to Laravel Frontend
     location / {
         proxy_pass http://frontend:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
+        proxy_set_header Host \\\$host;
+        proxy_set_header X-Real-IP \\\$remote_addr;
+        proxy_set_header X-Forwarded-For \\\$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \\\$scheme;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \\\$http_upgrade;
         proxy_set_header Connection "upgrade";
     }
 }
-NGINX_CONF
+NGINXEOF
 
-# Replace domain placeholder with actual domain
-sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" nginx/conf/default.conf
-
-# Step 5: Reload Nginx with HTTPS
+# Step 6: Reload nginx
 echo ""
-echo "🔄 Step 5: Reloading Nginx with SSL..."
-docker compose exec nginx nginx -s reload
+echo "🔄 Step 6: Reloading Nginx..."
+docker compose restart nginx
+sleep 2
 
 echo ""
 echo "============================================"
 echo "✅ SSL Setup Complete!"
-echo "============================================"
 echo ""
-echo "🌐 Access your app at:"
-echo "   https://$DOMAIN"
+echo "🌐 https://${DOMAIN}"
 echo ""
-echo "📌 To renew certificate (before it expires in 90 days):"
-echo "   docker compose run --rm certbot renew"
-echo "   docker compose exec nginx nginx -s reload"
-echo ""
-echo "💡 Tip: Add this cron job for auto-renewal:"
-echo '   0 3 * * 0 cd /home/ytrandom107/BisindoCNNfiv2 && docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload'
+echo "📌 Renew (before 90 days):"
+echo "   docker run --rm -v \$(pwd)/certbot/letsencrypt:/etc/letsencrypt -v \$(pwd)/certbot/www:/var/www/certbot certbot/certbot renew"
+echo "   docker compose restart nginx"
 echo "============================================"

@@ -1,10 +1,8 @@
 # ============================================
 # BISINDO CNN - Docker Compose
 # ============================================
-# Run from project ROOT (where api/ and frontend/ live):
-#   docker-compose up --build
-#   docker-compose down
-#   docker-compose down -v  (remove volumes too)
+# Deploy:
+#   chmod +x init-ssl.sh && ./init-ssl.sh
 # ============================================
 
 services:
@@ -70,41 +68,25 @@ services:
     networks:
       - bisindo-net
 
-  # ---- Nginx Reverse Proxy (HTTPS via Certbot) ----
+  # ---- Nginx Reverse Proxy ----
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: nginx:alpine
     container_name: bisindo-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
+      - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/letsencrypt:/etc/letsencrypt
     depends_on:
       - frontend
     networks:
       - bisindo-net
 
-  # ---- Certbot (Let's Encrypt SSL) ----
-  certbot:
-    image: certbot/certbot
-    container_name: bisindo-certbot
-    volumes:
-      - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
-    # Background renewal check every 12 hours
-    entrypoint: "/bin/sh -c 'while :; do certbot renew --quiet; sleep 12h; done'"
-
 volumes:
   mysql_data:
-    driver: local
-  certbot_certs:
-    driver: local
-  certbot_www:
     driver: local
 
 networks:
