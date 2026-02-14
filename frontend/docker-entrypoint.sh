@@ -24,6 +24,12 @@ until php -r "new PDO('mysql:host=${DB_HOST};port=${DB_PORT}', '${DB_USERNAME}',
 done
 echo "✅ Database connected!"
 
+# Create .env file if it doesn't exist (env_file in docker-compose only sets runtime vars)
+if [ ! -f /app/.env ]; then
+    echo "📄 Creating .env file from environment..."
+    env | grep -E '^(APP_|DB_|SESSION_|BROADCAST_|FILESYSTEM_|QUEUE_|CACHE_|LOG_|BCRYPT_|MAIL_|VITE_|FLASK_|REDIS_|MEMCACHED_|AWS_)' | sort > /app/.env
+fi
+
 # Generate app key if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
     echo "🔑 Generating application key..."
