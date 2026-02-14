@@ -12,6 +12,7 @@ api/test_dataset/
 api/debug_frames/
 api/*.png
 api/*.txt
+!api/requirements.txt
 api/*.html
 api/*.log
 

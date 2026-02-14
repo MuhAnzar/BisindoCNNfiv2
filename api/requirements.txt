@@ -2,7 +2,7 @@ flask
 flask-cors
 tensorflow==2.16.1
 numpy
-opencv-python
+opencv-python-headless
 Pillow
 mediapipe==0.10.14
 waitress
