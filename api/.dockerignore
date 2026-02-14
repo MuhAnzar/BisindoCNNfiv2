@@ -19,6 +19,7 @@ run_eval_*.py
 # Output files
 *.png
 *.txt
+!requirements.txt
 *.html
 *.log
 production.log
