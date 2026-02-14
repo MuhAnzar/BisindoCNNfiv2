@@ -70,7 +70,7 @@ services:
     networks:
       - bisindo-net
 
-  # ---- Nginx Reverse Proxy (HTTPS) ----
+  # ---- Nginx Reverse Proxy (HTTPS via Certbot) ----
   nginx:
     build:
       context: ./nginx
@@ -82,16 +82,30 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
-      - nginx_certs:/etc/nginx/certs
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     depends_on:
       - frontend
     networks:
       - bisindo-net
 
+  # ---- Certbot (Let's Encrypt SSL) ----
+  certbot:
+    image: certbot/certbot
+    container_name: bisindo-certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Run once then exit. To renew, run:
+    #   docker compose run --rm certbot renew
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 6h & wait $${!}; done;'"
+
 volumes:
   mysql_data:
     driver: local
-  nginx_certs:
+  certbot_certs:
+    driver: local
+  certbot_www:
     driver: local
 
 networks:

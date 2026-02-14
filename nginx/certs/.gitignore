@@ -1,4 +1,0 @@
-# SSL certs (generated on VPS)
-*.key
-*.crt
-*.pem
