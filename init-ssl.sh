@@ -40,7 +40,7 @@ fi
 # Step 3: Request certificate from Let's Encrypt
 echo ""
 echo "🔐 Step 3: Requesting SSL certificate from Let's Encrypt..."
-docker compose run --rm certbot certonly \
+docker compose run --rm --entrypoint "certbot" certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email "$EMAIL" \

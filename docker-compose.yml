@@ -96,9 +96,8 @@ services:
     volumes:
       - certbot_certs:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    # Run once then exit. To renew, run:
-    #   docker compose run --rm certbot renew
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 6h & wait $${!}; done;'"
+    # Background renewal check every 12 hours
+    entrypoint: "/bin/sh -c 'while :; do certbot renew --quiet; sleep 12h; done'"
 
 volumes:
   mysql_data:
