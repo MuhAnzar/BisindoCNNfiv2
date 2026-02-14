@@ -10,21 +10,27 @@ set -e
 
 # ---- Configuration ----
 IP="34.72.179.247"
-DOMAIN="${IP}.nip.io"
-EMAIL="ytrandom107@gmail.com"  # Change to your email
+DOMAIN="${IP}.sslip.io"  # Switched to sslip.io due to nip.io rate limits
+EMAIL="ytrandom107@gmail.com"
 
 echo "============================================"
 echo "🔐 BISINDO - SSL Setup"
 echo "  Domain: $DOMAIN"
 echo "============================================"
 
-# Step 1: Clean up and create directories
+# Step 1: Clean up (safely)
 echo ""
-echo "📁 Step 1: Cleaning up and creating directories..."
-# Remove old certbot dirs to prevent RecursionError/symlink loops
-rm -rf certbot/letsencrypt
+echo "📁 Step 1: Preparing directories..."
+
+# Only remove if we don't have a live cert yet
+if [ -d "certbot/letsencrypt/live/$DOMAIN" ]; then
+    echo "✅ Existing certificate found. Skipping cleanup."
+else
+    echo "🧹 Cleaning up old configuration..."
+    rm -rf certbot/letsencrypt
+    mkdir -p certbot/letsencrypt
+fi
 mkdir -p certbot/www/.well-known/acme-challenge
-mkdir -p certbot/letsencrypt
 
 # Step 2: Start containers
 echo ""
@@ -67,17 +73,22 @@ rm -f certbot/www/.well-known/acme-challenge/test-file
 # Step 4: Request certificate
 echo ""
 echo "🔐 Step 4: Requesting SSL certificate..."
-docker run --rm \
-    -v "$(pwd)/certbot/www:/var/www/certbot" \
-    -v "$(pwd)/certbot/letsencrypt:/etc/letsencrypt" \
-    certbot/certbot certonly \
-    --webroot \
-    -w /var/www/certbot \
-    --email "$EMAIL" \
-    --agree-tos \
-    --no-eff-email \
-    --non-interactive \
-    -d "$DOMAIN"
+
+if [ -d "certbot/letsencrypt/live/$DOMAIN" ]; then
+    echo "✅ Certificate already exists! Skipping request."
+else
+    docker run --rm \
+        -v "$(pwd)/certbot/www:/var/www/certbot" \
+        -v "$(pwd)/certbot/letsencrypt:/etc/letsencrypt" \
+        certbot/certbot certonly \
+        --webroot \
+        -w /var/www/certbot \
+        --email "$EMAIL" \
+        --agree-tos \
+        --no-eff-email \
+        --non-interactive \
+        -d "$DOMAIN"
+fi
 
 # Step 5: Switch nginx to HTTPS
 echo ""
