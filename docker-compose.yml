@@ -1,7 +1,7 @@
 # ============================================
 # BISINDO CNN - Docker Compose
 # ============================================
-# Usage:
+# Run from project ROOT (where api/ and frontend/ live):
 #   docker-compose up --build
 #   docker-compose down
 #   docker-compose down -v  (remove volumes too)
@@ -38,8 +38,10 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+    environment:
+      - MODELS_DIR=/app/models
     volumes:
-      - ./storage/app/public/models:/app/models:ro
+      - ./frontend/storage/app/public/models:/app/models:ro
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" ]
       interval: 30s
@@ -52,7 +54,7 @@ services:
   # ---- Laravel Frontend ----
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: bisindo-frontend
     restart: unless-stopped

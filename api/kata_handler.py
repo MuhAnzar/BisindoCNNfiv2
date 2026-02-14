@@ -319,10 +319,22 @@ def compute_pixel_motion(prev_frame, curr_frame):
 # MAIN HANDLER
 # =========================
 class KataModelHandler:
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, models_dir=None):
         self.base_dir = base_dir
-        self.model_path = os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models', 'kata', 'best_model_v3.keras')
-        self.labels_path = os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models', 'kata', 'labels_v3.json')
+        
+        # If models_dir is provided (Docker), use it directly
+        if models_dir and os.path.exists(models_dir):
+            kata_models_dir = os.path.join(models_dir, 'kata')
+            self.model_path = os.path.join(kata_models_dir, 'best_model_v3.keras')
+            self.labels_path = os.path.join(kata_models_dir, 'labels_v3.json')
+        else:
+            # Local dev: new structure where api/ is sibling of frontend/
+            kata_local = os.path.join(base_dir, '..', 'frontend', 'storage', 'app', 'public', 'models', 'kata')
+            if not os.path.exists(kata_local):
+                # Fallback: old structure where api/ was inside Laravel project
+                kata_local = os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models', 'kata')
+            self.model_path = os.path.join(kata_local, 'best_model_v3.keras')
+            self.labels_path = os.path.join(kata_local, 'labels_v3.json')
         self.model = None
         self.class_names = []
         

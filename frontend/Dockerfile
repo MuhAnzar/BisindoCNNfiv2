@@ -44,9 +44,6 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 # Copy application code
 COPY . .
 
-# Remove files not needed in container
-RUN rm -rf node_modules api/.venv api/__pycache__ api/test api/test_dataset
-
 # Complete composer install (autoload, scripts)
 RUN composer dump-autoload --optimize
 

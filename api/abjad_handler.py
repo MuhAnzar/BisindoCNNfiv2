@@ -8,16 +8,21 @@ import io
 import base64
 
 class AbjadModelHandler:
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, models_dir=None):
         self.base_dir = base_dir
-        # Path logic: base_dir is 'api', so we go up one level
-        # Assuming Laravel structure: public/storage/models/ -> storage/app/public/models/
-        # We try to locate files robustly
         
-        self.probs_db = os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models')
-        if not os.path.exists(self.probs_db):
-             # Fallback to public/storage if storage/app/public not found or symlinked differently
-             self.probs_db = os.path.join(base_dir, '..', 'public', 'storage', 'models')
+        # If models_dir is provided (Docker), use it directly
+        if models_dir and os.path.exists(models_dir):
+            self.probs_db = models_dir
+        else:
+            # Local dev: path logic relative to base_dir
+            # New structure: api/ is sibling of frontend/
+            self.probs_db = os.path.join(base_dir, '..', 'frontend', 'storage', 'app', 'public', 'models')
+            if not os.path.exists(self.probs_db):
+                # Fallback: old structure where api/ was inside Laravel project
+                self.probs_db = os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models')
+            if not os.path.exists(self.probs_db):
+                 self.probs_db = os.path.join(base_dir, '..', 'public', 'storage', 'models')
 
         self.model_path = os.path.join(self.probs_db, 'best_abjad.keras')
         self.labels_path = os.path.join(self.probs_db, 'class_names.json')

@@ -24,11 +24,16 @@ if not app.debug:
 
 DEBUG_REQUESTS = True  # Enable to see prediction logs
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.environ.get('MODELS_DIR', None)
 
 print("=" * 60)
 print("🚀 BISINDO Detection API - Initializing")
 print("=" * 60)
 print(f"TensorFlow: {tf.__version__}")
+if MODELS_DIR:
+    print(f"Models Dir: {MODELS_DIR} (Docker mode)")
+else:
+    print(f"Models Dir: auto-detect (local mode)")
 
 # =========================
 # LOAD HANDLERS
@@ -40,8 +45,8 @@ try:
     
     # Initialize Handlers
     print("\n📦 Loading Models...")
-    abjad_handler = AbjadModelHandler(BASE_DIR)
-    kata_handler = KataModelHandler(BASE_DIR)
+    abjad_handler = AbjadModelHandler(BASE_DIR, models_dir=MODELS_DIR)
+    kata_handler = KataModelHandler(BASE_DIR, models_dir=MODELS_DIR)
     nlg_handler = NLGHandler()
     print("📝 NLG Handler loaded")
     

@@ -27,18 +27,8 @@ COPY nlg_kalimat_handler.py .
 COPY nlg_kata_handler.py .
 
 # Models will be mounted via volume at /app/models
-# The handlers reference: ../storage/app/public/models
-# We create a symlink so the existing path resolution works
-RUN mkdir -p /app/storage/app/public/models
-# Symlink: when handler does os.path.join(base_dir, '..', 'storage', 'app', 'public', 'models')
-# base_dir = /app, so it looks at /storage/app/public/models
-# We need to handle this. Let's create the path at the root level too.
-RUN mkdir -p /storage/app/public/models && \
-    ln -sf /app/models/best_abjad.keras /storage/app/public/models/best_abjad.keras && \
-    ln -sf /app/models/class_names.json /storage/app/public/models/class_names.json && \
-    mkdir -p /storage/app/public/models/kata && \
-    ln -sf /app/models/kata/best_model_v3.keras /storage/app/public/models/kata/best_model_v3.keras && \
-    ln -sf /app/models/kata/labels_v3.json /storage/app/public/models/kata/labels_v3.json
+# The MODELS_DIR env var tells handlers where to find models
+ENV MODELS_DIR=/app/models
 
 EXPOSE 5000
 
