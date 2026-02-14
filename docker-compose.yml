@@ -72,7 +72,9 @@ services:
 
   # ---- Nginx Reverse Proxy (HTTPS) ----
   nginx:
-    image: nginx:latest
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: bisindo-nginx
     restart: unless-stopped
     ports:
@@ -80,7 +82,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs
+      - nginx_certs:/etc/nginx/certs
     depends_on:
       - frontend
     networks:
@@ -88,6 +90,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  nginx_certs:
     driver: local
 
 networks:
