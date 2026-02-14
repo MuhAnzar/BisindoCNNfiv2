@@ -10,7 +10,7 @@ set -e
 
 # ---- Configuration ----
 IP="34.72.179.247"
-DOMAIN="${IP}.sslip.io"  # Switched to sslip.io due to nip.io rate limits
+DOMAIN="${IP}.traefik.me"  # Switched to traefik.me due to sslip.io/nip.io rate limits
 EMAIL="ytrandom107@gmail.com"
 
 echo "============================================"
