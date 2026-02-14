@@ -11,7 +11,7 @@ set -e
 # ---- Configuration ----
 IP="34.72.179.247"
 DOMAIN="${IP}.nip.io"
-EMAIL="admin@example.com"  # Change to your email
+EMAIL="ytrandom107@gmail.com"  # Change to your email
 
 echo "============================================"
 echo "🔐 BISINDO - SSL Setup"
